@@ -212,3 +212,97 @@ export const carForSaleAtDealership = async (req, res) => {
     await client.close();
   }
 };
+
+// get all deals
+// Get all deals
+export const getAllDeals = async (req, res) => {
+  try {
+    const database = client.db(process.env.DB_NAME);
+    const dealsCollection = database.collection("deals");
+
+    const allDeals = await dealsCollection.find({}).toArray();
+
+    res.status(200).json(allDeals);
+  } catch (error) {
+    console.error("Error fetching deals:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Get all deals for a specific dealer
+export const getAllDealsForASpecificDealer = async (req, res) => {
+  try {
+    const { dealership_name } = req.params;
+
+    const database = client.db(process.env.DB_NAME);
+    const dealershipsCollection = database.collection("dealerships");
+    const dealsCollection = database.collection("deals");
+
+    // Case-insensitive search for the dealer by name
+    const dealer = await dealershipsCollection.findOne({
+      dealership_name: { $regex: new RegExp(dealership_name, "i") },
+    });
+
+    if (!dealer) {
+      return res.status(404).json({ error: "Dealer not found" });
+    }
+
+    // Fetch all deals associated with the dealer
+    const dealerDeals = await dealsCollection
+      .find({ deal_id: { $in: dealer.deals } })
+      .toArray();
+
+    res.status(200).json(dealerDeals)
+  } catch (error) {
+    console.error("Error fetching deals for dealer:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+// Post new deal
+export const postNewDeal = async (req, res) => {
+  try {
+    const { car_id, deal_info } = req.body;
+    const { dealership_name } = req.params;
+
+    // Connect to MongoDB
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const dealsCollection = database.collection("deals");
+    const dealershipsCollection = database.collection("dealerships");
+
+    // Find the dealership by name
+    const dealership = await dealershipsCollection.findOne({ dealership_name });
+    if (!dealership) {
+      return res.status(404).json({ error: "Dealership not found" });
+    }
+
+    // Generate deal ID
+    const deal_id = uuidv4();
+    // Push deal ID to the dealership's deals array
+    await dealershipsCollection.updateOne(
+      { dealership_name },
+      { $push: { deals: deal_id } }
+    );
+
+    // Create new deal object
+    const newDeal = {
+      deal_id,
+      car_id,
+      deal_info,
+    };
+
+    // Insert new deal into database
+    await dealsCollection.insertOne(newDeal);
+
+    res.status(201).json({ message: "Deal posted successfully" });
+  } catch (error) {
+    console.error("Error posting deal:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    // Close the MongoDB client connection
+    await client.close();
+  }
+};
+

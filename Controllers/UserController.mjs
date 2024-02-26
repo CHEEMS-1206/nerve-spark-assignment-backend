@@ -259,3 +259,27 @@ export const getCarByUser = async (req, res) => {
     await client.close();
   }
 };
+
+// get all deals for any car
+export const getDealsForCar = async (req, res) => {
+  try {
+    // Extract the car ID from the request parameters
+    const { car_id } = req.params;
+
+    // Connect to the database
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const dealsCollection = database.collection("deals");
+
+    // Find all deals associated with the specified car ID
+    const carDeals = await dealsCollection.find({ car_id }).toArray();
+
+    // Return the deals
+    res.status(200).json(carDeals);
+  } catch (error) {
+    console.error("Error fetching deals for car:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close()
+  }
+};
