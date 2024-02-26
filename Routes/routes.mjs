@@ -1,8 +1,21 @@
 import express from "express";
 
-import { userLogin, userRegister, getAllCars, getCarById, getCarByDealership } from "../Controllers/UserController.mjs";
+import {
+  userLogin,
+  userRegister,
+  getAllCars,
+  getCarById,
+  getCarByDealership,
+  getCarsByUser,
+  getCarByUser,
+} from "../Controllers/UserController.mjs";
 import { adminRegister, adminLogin } from "../controllers/adminController.mjs";
-import { dealershipRegister, dealershipLogin} from '../Controllers/DealerShipController.mjs'
+import {
+  dealershipRegister,
+  dealershipLogin,
+  allCarsForSaleAtDealership,
+  carForSaleAtDealership
+} from "../Controllers/DealerShipController.mjs";
 
 const adminRouter = express.Router();
 const userRoutes = express.Router();
@@ -14,37 +27,37 @@ adminRouter.post("/login", adminLogin); // login admin
 adminRouter.post("/register", adminRegister); // register admin
 
 // user routes  ("http://localhost:5001/api/user")
-userRoutes.post("/login",userLogin) // user login
-userRoutes.post("/register",userRegister); // user register
-userRoutes.get("/cars",getAllCars) // view all cars
-userRoutes.get("/cars/dealership=:dealership_name", getCarByDealership) // view all cars by dealers
-userRoutes.get("/car/:car_id", getCarById) // about certain car
-userRoutes.get("/car/deals") // deals on a certain car
+userRoutes.post("/login", userLogin); // user login
+userRoutes.post("/register", userRegister); // user register
+userRoutes.get("/cars", getAllCars); // view all cars
+userRoutes.get("/cars/dealership=:dealership_name", getCarByDealership); // view all cars by dealers
+userRoutes.get("/car/:car_id", getCarById); // about certain car
+userRoutes.get("/car/deals"); // deals on a certain car
 userRoutes.post("/buy-car"); // add in owned vehicles
-userRoutes.get("/my-vehicles") // all owned vehicles with dealer info
-userRoutes.get("/my-vehicle/:car_id") // every owned vehicle with info
-userRoutes.get("/deals") // all deals
-userRoutes.get("/deals/dealership=:dealership_name") // all deals by dealers
+userRoutes.get("/my-vehicles/:user_id", getCarsByUser); // all owned vehicles with dealer info
+userRoutes.get("/my-vehicle/:user_id/:car_id", getCarByUser); // every owned vehicle with info
+userRoutes.get("/deals"); // all deals
+userRoutes.get("/deals/dealership=:dealership_name"); // all deals by dealers
 
 // dealership routes ("http://localhost:5001/api/dealership")
 
-dealershipRoutes.post("/login",dealershipLogin) // dealership login
-dealershipRoutes.post("/register",dealershipRegister); // dealers register
+dealershipRoutes.post("/login", dealershipLogin); // dealership login
+dealershipRoutes.post("/register", dealershipRegister); // dealers register
 dealershipRoutes.get("/cars", getAllCars); // view all cars
-dealershipRoutes.get("/car/:car_id", getCarById) // about certain car
+dealershipRoutes.get("/car/:car_id", getCarById); // about certain car
 dealershipRoutes.get("/cars/dealership=:dealership_name", getCarByDealership); // view all cars by dealers
 dealershipRoutes.post("/sell-car"); // sold vehicles me add
-dealershipRoutes.get("/my-vehicles") // all sold vehicles with dealer info
-dealershipRoutes.get("/my-vehicle/id") // every sold vehicle with info
-dealershipRoutes.get("/deals") // all deals
-dealershipRoutes.get("/deals/dealership=?") // by dealers
-dealershipRoutes.post("/deals") // add new deal
+dealershipRoutes.get("/my-vehicles/:dealership_id", allCarsForSaleAtDealership); // all sold vehicles with dealer info
+dealershipRoutes.get("/my-vehicle/:dealership_id/:car_id", carForSaleAtDealership); // every sold vehicle with info
+dealershipRoutes.get("/deals"); // all deals
+dealershipRoutes.get("/deals/dealership=?"); // by dealers
+dealershipRoutes.post("/deals"); // add new deal
 
 // returning an object of all routers
 const routers = {
   adminRouter,
   userRoutes,
-  dealershipRoutes
+  dealershipRoutes,
 };
 
 export default routers;

@@ -192,3 +192,70 @@ export const getCarById = async (req, res) => {
     await client.close();
   }
 };
+
+// gell all vehicles owned by me
+export const getCarsByUser = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    // Connect to MongoDB
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const usersCollection = database.collection("users");
+    const carsCollection = database.collection("cars");
+
+    // Find user by ID
+    const user = await usersCollection.findOne({ user_id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Fetch cars owned by the user
+    const userCars = await carsCollection
+      .find({ car_id: { $in: user.vehicle_info } })
+      .toArray();
+
+    // Return the list of cars owned by the user
+    res.status(200).json(userCars);
+  } catch (error) {
+    console.error("Error fetching cars by user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+};
+
+// get vehicle details owned by me
+export const getCarByUser = async (req, res) => {
+  try {
+    const { user_id, car_id } = req.params;
+
+    // Connect to MongoDB
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const usersCollection = database.collection("users");
+    const carsCollection = database.collection("cars");
+
+    // Find user by ID
+    const user = await usersCollection.findOne({ user_id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if the user owns the specified car
+    if (!user.vehicle_info.includes(car_id)) {
+      return res.status(404).json({ error: "Car not found for the user" });
+    }
+
+    // Fetch the car by ID
+    const car = await carsCollection.findOne({ car_id });
+
+    // Return the car owned by the user
+    res.status(200).json(car);
+  } catch (error) {
+    console.error("Error fetching car by user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+};
