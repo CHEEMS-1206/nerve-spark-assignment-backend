@@ -2,13 +2,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { MongoClient } from "mongodb";
+
+// schemas for collections
 import {
-  Admin,
-  User,
-  Dealership,
-  Deal,
-  Car,
-  SoldVehicle,
+  adminSchema,
+  userSchema,
+  dealershipSchema,
+  dealSchema,
+  carSchema,
+  soldVehicleSchema,
 } from "../Models/models.mjs";
 
 const initializeDatabase = async () => {
@@ -37,8 +39,17 @@ const initializeDatabase = async () => {
       (collection) => !collectionNames.includes(collection)
     );
 
+    const schemas = {
+      admins: adminSchema,
+      users: userSchema,
+      dealerships: dealershipSchema,
+      deals: dealSchema,
+      cars: carSchema,
+      sold_vehicles: soldVehicleSchema,
+    };
+
     for (const collection of missingCollections) {
-      await db.createCollection(collection);
+      await db.createCollection(collection, schemas[collection]);
       console.log(`Collection "${collection}" created successfully`);
     }
 
