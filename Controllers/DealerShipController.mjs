@@ -214,7 +214,6 @@ export const carForSaleAtDealership = async (req, res) => {
 };
 
 // get all deals
-// Get all deals
 export const getAllDeals = async (req, res) => {
   try {
     const database = client.db(process.env.DB_NAME);
@@ -258,7 +257,6 @@ export const getAllDealsForASpecificDealer = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 // Post new deal
 export const postNewDeal = async (req, res) => {
@@ -305,4 +303,3 @@ export const postNewDeal = async (req, res) => {
     await client.close();
   }
 };
-
