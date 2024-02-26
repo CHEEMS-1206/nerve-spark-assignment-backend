@@ -119,3 +119,76 @@ export const userLogin = async (req, res) => {
     await client.close();
   }
 };
+
+// get all cars
+export const getAllCars = async (req, res) => {
+  try {
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const carsCollection = database.collection("cars");
+    
+    const allCars = await carsCollection.find({}).toArray();
+    
+    res.status(200).json(allCars);
+  } catch (error) {
+    console.error("Error fetching cars:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+};
+
+// Get all cars by dealership
+export const getCarByDealership = async (req, res) => {
+  try {
+    const { dealership_name } = req.params;
+
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const carsCollection = database.collection("cars");
+    const dealershipCollection = database.collection("dealerships");
+
+    // Find the dealership document
+    const dealership = await dealershipCollection.findOne({ dealership_name });
+    if (!dealership) {
+      return res.status(404).json({ error: "Dealership not found" });
+    }
+
+    // Retrieve the list of car IDs associated with the dealership
+    const carIdsInDealership = dealership.cars;
+
+    // Fetch the details of all cars whose IDs match the ones associated with the dealership
+    const dealershipCars = await carsCollection.find({ car_id: { $in: carIdsInDealership } }).toArray();
+
+    res.status(200).json(dealershipCars);
+  } catch (error) {
+    console.error("Error fetching cars by dealership:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+};
+
+// get a certain car by id 
+export const getCarById = async (req, res) => {
+  try {
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const carsCollection = database.collection("cars");
+    
+    const { car_id } = req.params;
+    
+    const car = await carsCollection.findOne({ car_id: car_id });
+    
+    if (!car) {
+      return res.status(404).json({ error: "Car not found" });
+    }
+    
+    res.status(200).json(car);
+  } catch (error) {
+    console.error("Error fetching car by ID:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+};
