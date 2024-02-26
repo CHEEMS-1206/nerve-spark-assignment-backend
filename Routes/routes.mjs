@@ -1,6 +1,8 @@
 import express from "express";
 
-import { login as adminLogin, register as adminRegister } from "../controllers/adminController.mjs";
+import { userLogin, userRegister } from "../Controllers/UserController.mjs";
+import { adminRegister, adminLogin } from "../controllers/adminController.mjs";
+import { dealershipRegister, dealershipLogin} from '../Controllers/DealerShipController.mjs'
 
 const adminRouter = express.Router();
 const userRoutes = express.Router();
@@ -12,8 +14,8 @@ adminRouter.post("/login", adminLogin); // login admin
 adminRouter.post("/register", adminRegister); // register admin
 
 // user routes  ("http://localhost:5001/api/user")
-userRoutes.post("/login") // user login
-userRoutes.post("/register"); // user register
+userRoutes.post("/login",userLogin) // user login
+userRoutes.post("/register",userRegister); // user register
 userRoutes.get("/cars") // view all cars
 userRoutes.get("/cars/dealership=?") // view all cars by dealers
 userRoutes.get("/car/id") // about certain car
@@ -26,8 +28,8 @@ userRoutes.get("/deals/dealership=?") // all deals by dealers
 
 // dealership routes ("http://localhost:5001/api/dealership")
 
-dealershipRoutes.post("/login") // dealership login
-dealershipRoutes.post("/register"); // dealers register
+dealershipRoutes.post("/login",dealershipLogin) // dealership login
+dealershipRoutes.post("/register",dealershipRegister); // dealers register
 dealershipRoutes.get("/cars") // view all cars
 dealershipRoutes.get("/cars/dealership=?") // view all cars by dealers
 dealershipRoutes.post("/sell-car"); // sold vehicles me add
