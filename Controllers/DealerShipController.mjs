@@ -208,7 +208,7 @@ export const allCarsForSaleAtDealership = async (req, res) => {
 export const carForSaleAtDealership = async (req, res) => {
   try {
     const dealership_id = req.headers.dealership_id;
-    const car_id = req.headers.car_id;
+    const {car_id} = req.params;
 
     // Connect to MongoDB
     await client.connect();

@@ -65,11 +65,11 @@ dealershipRoutes.post("/add-car", addNewCar); // adding cars by dealership
 
 // general routes
 generalRoutes.get("/cars", getAllCars); // view all cars
-generalRoutes.get("/cars/dealership=:dealership_name", getCarByDealership); // view all cars by dealers
+generalRoutes.get("/cars/:dealership_name", getCarByDealership); // view all cars by dealers
 generalRoutes.get("/car/:car_id", getCarById); // about certain car
 generalRoutes.get("/car/deals/:car_id", getDealsForCar); // deals on a certain car
 generalRoutes.get("/deals", getAllDeals); // all deals
-generalRoutes.get("/deals/dealership=:dealership_name",getAllDealsForASpecificDealer); // all deals by dealers
+generalRoutes.get("/deals/:dealership_name",getAllDealsForASpecificDealer); // all deals by dealers
 
 // returning an object of all routers
 const routers = {
