@@ -146,6 +146,10 @@ export const dealershipLogin = async (req, res) => {
   }
 };
 
+// Logout dealership
+export const dealershipLogout = async (req, res) =>{
+}
+
 // gell all vehicles owned by dealership
 export const allCarsForSaleAtDealership = async (req, res) => {
   try {
@@ -213,51 +217,6 @@ export const carForSaleAtDealership = async (req, res) => {
   }
 };
 
-// get all deals
-export const getAllDeals = async (req, res) => {
-  try {
-    const database = client.db(process.env.DB_NAME);
-    const dealsCollection = database.collection("deals");
-
-    const allDeals = await dealsCollection.find({}).toArray();
-
-    res.status(200).json(allDeals);
-  } catch (error) {
-    console.error("Error fetching deals:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// Get all deals for a specific dealer
-export const getAllDealsForASpecificDealer = async (req, res) => {
-  try {
-    const { dealership_name } = req.params;
-
-    const database = client.db(process.env.DB_NAME);
-    const dealershipsCollection = database.collection("dealerships");
-    const dealsCollection = database.collection("deals");
-
-    // Case-insensitive search for the dealer by name
-    const dealer = await dealershipsCollection.findOne({
-      dealership_name: { $regex: new RegExp(dealership_name, "i") },
-    });
-
-    if (!dealer) {
-      return res.status(404).json({ error: "Dealer not found" });
-    }
-
-    // Fetch all deals associated with the dealer
-    const dealerDeals = await dealsCollection
-      .find({ deal_id: { $in: dealer.deals } })
-      .toArray();
-
-    res.status(200).json(dealerDeals)
-  } catch (error) {
-    console.error("Error fetching deals for dealer:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
 // Post new deal
 export const postNewDeal = async (req, res) => {
   try {
@@ -300,6 +259,49 @@ export const postNewDeal = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   } finally {
     // Close the MongoDB client connection
+    await client.close();
+  }
+};
+
+export const addNewCar = async (req, res) => {
+  try {
+    const { car_id, type, name, model, car_info } = req.body;
+
+    // Convert launch date string to Date object
+    const launch_date = new Date(car_info.launch_date);
+
+    // Connect to MongoDB
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const carsCollection = database.collection("cars");
+
+    // Check if the car ID already exists
+    const existingCar = await carsCollection.findOne({ car_id });
+    if (existingCar) {
+      return res.status(409).json({ error: "Car ID already exists" });
+    }
+
+    // Create a new car document
+    const newCar = {
+      car_id,
+      type,
+      name,
+      model,
+      car_info: {
+        ...car_info,
+        launch_date, // Add launch date as Date object
+      },
+    };
+
+    // Insert the new car document into the database
+    await carsCollection.insertOne(newCar);
+
+    // Return success response
+    res.status(201).json({ message: "Car added successfully" });
+  } catch (error) {
+    console.error("Error adding car:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
     await client.close();
   }
 };

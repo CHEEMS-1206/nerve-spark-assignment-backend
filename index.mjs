@@ -9,7 +9,6 @@ import cors from "cors";
 const SERVER = express();
 import initializeDatabase from './Config/config.mjs'
 import routers from "./Routes/routes.mjs";
-import { addCar } from "./Controllers/CarPost.mjs";
 
 // Parsing the JSON, CORS policy, URL encoding, and JSON formatting
 SERVER.use(bodyParser.json());
@@ -18,10 +17,10 @@ SERVER.use(express.urlencoded({ extended: true }));
 SERVER.use(express.json());
 
 // MIDDLEWARE
-SERVER.use("/api/admin",routers.adminRouter)
+SERVER.use("/api/admin",routers.adminRoutes)
 SERVER.use("/api/user",routers.userRoutes)
 SERVER.use("/api/dealership",routers.dealershipRoutes)
-SERVER.use("/api/add-car",addCar)
+SERVER.use("/api", routers.generalRoutes)
 
 // Defining port for backend rest server
 const PORT = 5001;

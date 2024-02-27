@@ -113,3 +113,7 @@ export const adminLogin = async (req, res) => {
     await client.close();
   }
 };
+
+// Looging out admin
+export const adminLogout = async (req,res) =>{
+}
