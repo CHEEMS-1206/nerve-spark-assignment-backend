@@ -3,13 +3,13 @@ import express from "express";
 import {
   adminRegister,
   adminLogin,
-  adminLogout,
+  validateAdmin,
 } from "../controllers/adminController.mjs";
 
 import {
   userRegister,
   userLogin,
-  userLogout,
+  validateUser,
   getMyCarsDetails,
   getMyCarDetails,
   addSoldVehicles,
@@ -18,7 +18,7 @@ import {
 import {
   dealershipRegister,
   dealershipLogin,
-  dealershipLogout,
+  validateDealership,
   allCarsForSaleAtDealership,
   carForSaleAtDealership,
   postNewDeal,
@@ -43,12 +43,12 @@ const generalRoutes = express.Router();
 // admin routes ("http://localhost:5001/api/admin)
 adminRoutes.post("/login", adminLogin); // login admin
 adminRoutes.post("/register", adminRegister); // register admin
-adminRoutes.post("/logout"); // logging out admin
+adminRoutes.post("/validate-token", validateAdmin); // validate admin token
 
 // user routes  ("http://localhost:5001/api/user")
 userRoutes.post("/login", userLogin); // user login
 userRoutes.post("/register", userRegister); // user register
-userRoutes.post("/logout",userLogout); // logging out user
+userRoutes.post("/validate-token",validateUser); // validate user token
 userRoutes.post("/buy-car", addSoldVehicles); // add in owned vehicles
 userRoutes.get("/my-vehicles/:user_id", getMyCarsDetails); // all owned vehicles with dealer info
 userRoutes.get("/my-vehicle/:user_id/:car_id", getMyCarDetails); // every owned vehicle with info
@@ -56,7 +56,7 @@ userRoutes.get("/my-vehicle/:user_id/:car_id", getMyCarDetails); // every owned 
 // dealership routes ("http://localhost:5001/api/dealership")
 dealershipRoutes.post("/login", dealershipLogin); // dealership login
 dealershipRoutes.post("/register", dealershipRegister); // dealers register
-dealershipRoutes.post("/logout", dealershipLogout); // logging out dealership
+dealershipRoutes.post("/validate-token", validateDealership); // validate dealership token
 dealershipRoutes.post("/sell-car", addSoldVehicles); // sold vehicles me add
 dealershipRoutes.get("/vehicles-for-sale/:dealership_id",allCarsForSaleAtDealership); // all sold vehicles with dealer info
 dealershipRoutes.get("/vehicle-for-sale/:dealership_id/:car_id",carForSaleAtDealership); // every sold vehicle with info
