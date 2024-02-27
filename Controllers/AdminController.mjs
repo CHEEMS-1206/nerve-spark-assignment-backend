@@ -105,7 +105,7 @@ export const adminLogin = async (req, res) => {
     });
 
     // Return token
-    res.status(200).json({ token });
+    res.status(200).json({ token, admin_id : admin.admin_id });
   } catch (error) {
     console.error("Error logging in admin:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -114,6 +114,28 @@ export const adminLogin = async (req, res) => {
   }
 };
 
-// Looging out admin
-export const adminLogout = async (req,res) =>{
+// validating the token 
+export const validateAdmin = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (decoded) {
+      const { admin_id } = decoded; 
+      res.status(200).json({ admin_id, message: "Valid Token" }); 
+      return;
+    }
+  } catch (error) {
+    console.error("Token verification error:", error);
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ msg: "Token expired, please login again." });
+    } else if (
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.NotBeforeError
+    ) {
+      res.status(403).json({ msg: "Invalid token." });
+    } else {
+      res.status(500).json({ msg: "Internal server error." });
+    }
+  }
 }
