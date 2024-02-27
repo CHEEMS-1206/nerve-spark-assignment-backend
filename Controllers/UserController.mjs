@@ -111,7 +111,7 @@ export const userLogin = async (req, res) => {
     });
 
     // Return token
-    res.status(200).json({ token });
+    res.status(200).json({ token , user_id : user.user_id });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -120,8 +120,30 @@ export const userLogin = async (req, res) => {
   }
 };
 
-// logging out user
-export const userLogout = async (req,res) => {
+// validate user token
+export const validateUser = async (req,res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (decoded) {
+      const { user_id } = decoded;
+      res.status(200).json({ user_id, message: "Valid Token" });
+      return;
+    }
+  } catch (error) {
+    console.error("Token verification error:", error);
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ msg: "Token expired, please login again." });
+    } else if (
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.NotBeforeError
+    ) {
+      res.status(403).json({ msg: "Invalid token." });
+    } else {
+      res.status(500).json({ msg: "Internal server error." });
+    }
+  }
 }
 
 // gell all vehicles owned by me
