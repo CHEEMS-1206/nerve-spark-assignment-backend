@@ -283,3 +283,58 @@ export const getDealsForCar = async (req, res) => {
     await client.close()
   }
 };
+
+// add sold vehicles
+export const addSoldVehicles = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { user_id, car_id, dealership_id } = req.body;
+
+    // Connect to the database
+    await client.connect();
+    const database = client.db(process.env.DB_NAME);
+    const usersCollection = database.collection("users");
+    const dealershipsCollection = database.collection("dealerships");
+    const soldVehiclesCollection = database.collection("sold_vehicles");
+
+    // Fetch user and dealership details
+    const user = await usersCollection.findOne({ user_id });
+    const dealership = await dealershipsCollection.findOne({ dealership_id });
+
+    // Generate a new ID for the sold vehicle
+    const vehicle_id = `${car_id}-${uuidv4()}`;
+
+    // Update user's vehicle info
+    await usersCollection.updateOne(
+      { user_id },
+      { $push: { vehicle_info: vehicle_id } }
+    );
+
+    // Update dealership's sold vehicles
+    await dealershipsCollection.updateOne(
+      { dealership_id },
+      { $push: { sold_vehicles: vehicle_id } }
+    );
+
+    // Create a new entry in the sold vehicles collection
+    const carInfo = await database.collection("cars").findOne({ car_id });
+    const vehicle_info = {
+      type: carInfo.type,
+      name: carInfo.name,
+      model: carInfo.model,
+    };
+    await soldVehiclesCollection.insertOne({
+      vehicle_id,
+      car_id,
+      vehicle_info,
+    });
+
+    // Respond with success message
+    res.status(201).json({ message: "Sold vehicle added successfully" });
+  } catch (error) {
+    console.error("Error adding sold vehicle:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+};

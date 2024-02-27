@@ -8,7 +8,8 @@ import {
   getCarByDealership,
   getCarsByUser,
   getCarByUser,
-  getDealsForCar
+  getDealsForCar,
+  addSoldVehicles
 } from "../Controllers/UserController.mjs";
 import { adminRegister, adminLogin } from "../controllers/adminController.mjs";
 import {
@@ -37,7 +38,7 @@ userRoutes.get("/cars", getAllCars); // view all cars
 userRoutes.get("/cars/dealership=:dealership_name", getCarByDealership); // view all cars by dealers
 userRoutes.get("/car/:car_id", getCarById); // about certain car
 userRoutes.get("/car/deals/:car_id", getDealsForCar); // deals on a certain car
-userRoutes.post("/buy-car"); // add in owned vehicles
+userRoutes.post("/buy-car",addSoldVehicles); // add in owned vehicles
 userRoutes.get("/my-vehicles/:user_id", getCarsByUser); // all owned vehicles with dealer info
 userRoutes.get("/my-vehicle/:user_id/:car_id", getCarByUser); // every owned vehicle with info
 userRoutes.get("/deals",getAllDeals); // all deals
@@ -50,7 +51,7 @@ dealershipRoutes.post("/register", dealershipRegister); // dealers register
 dealershipRoutes.get("/cars", getAllCars); // view all cars
 dealershipRoutes.get("/car/:car_id", getCarById); // about certain car
 dealershipRoutes.get("/cars/dealership=:dealership_name", getCarByDealership); // view all cars by dealers
-dealershipRoutes.post("/sell-car"); // sold vehicles me add
+dealershipRoutes.post("/sell-car",addSoldVehicles); // sold vehicles me add
 dealershipRoutes.get("/my-vehicles/:dealership_id", allCarsForSaleAtDealership); // all sold vehicles with dealer info
 dealershipRoutes.get("/my-vehicle/:dealership_id/:car_id", carForSaleAtDealership); // every sold vehicle with info
 dealershipRoutes.get("/deals",getAllDeals); // all deals
