@@ -137,7 +137,7 @@ export const dealershipLogin = async (req, res) => {
     );
 
     // Return token
-    res.status(200).json({ token });
+    res.status(200).json({ token, dealership_id : dealership.dealership_id });
   } catch (error) {
     console.error("Error logging in dealership:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -146,8 +146,30 @@ export const dealershipLogin = async (req, res) => {
   }
 };
 
-// Logout dealership
-export const dealershipLogout = async (req, res) =>{
+// validate dealership token
+export const validateDealership = async (req, res) =>{
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (decoded) {
+      const { dealership_id } = decoded;
+      res.status(200).json({ dealership_id, message: "Valid Token" });
+      return;
+    }
+  } catch (error) {
+    console.error("Token verification error:", error);
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ msg: "Token expired, please login again." });
+    } else if (
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.NotBeforeError
+    ) {
+      res.status(403).json({ msg: "Invalid token." });
+    } else {
+      res.status(500).json({ msg: "Internal server error." });
+    }
+  }
 }
 
 // gell all vehicles owned by dealership
