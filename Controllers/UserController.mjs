@@ -149,12 +149,13 @@ export const validateUser = async (req,res) => {
 // gell all vehicles owned by me
 export const getMyCarsDetails = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const user_id = req.headers.user_id;
 
     // Connect to MongoDB
     await client.connect();
     const database = client.db(process.env.DB_NAME);
     const usersCollection = database.collection("users");
+    const soldVehiclesCollection = database.collection("sold_vehicles");
     const carsCollection = database.collection("cars");
 
     // Find user by ID
@@ -163,9 +164,18 @@ export const getMyCarsDetails = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Fetch cars owned by the user
+    // getting all vehicles
+    const vehicleIds = await user.vehicle_info;
+
+    // Find corresponding car IDs from sold_vehicles collection
+    const soldVehicles = await soldVehiclesCollection
+      .find({ vehicle_id: { $in: vehicleIds } })
+      .toArray();
+    const carIds = soldVehicles.map((vehicle) => vehicle.car_id);
+
+    // Fetch details of cars owned by the user
     const userCars = await carsCollection
-      .find({ car_id: { $in: user.vehicle_info } })
+      .find({ car_id: { $in: carIds } })
       .toArray();
 
     // Return the list of cars owned by the user
@@ -181,12 +191,14 @@ export const getMyCarsDetails = async (req, res) => {
 // get vehicle details owned by me
 export const getMyCarDetails = async (req, res) => {
   try {
-    const { user_id, car_id } = req.params;
+    const user_id = req.headers.user_id;
+    const { car_id } = req.params;
 
     // Connect to MongoDB
     await client.connect();
     const database = client.db(process.env.DB_NAME);
     const usersCollection = database.collection("users");
+    const soldVehiclesCollection = database.collection("sold_vehicles");
     const carsCollection = database.collection("cars");
 
     // Find user by ID
@@ -195,12 +207,19 @@ export const getMyCarDetails = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Check if the user owns the specified car
-    if (!user.vehicle_info.includes(car_id)) {
+    const userVehicleIds = user.vehicle_info;   
+    // Find corresponding car IDs from sold_vehicles collection
+    const soldVehicles = await soldVehiclesCollection
+      .find({ vehicle_id: { $in: userVehicleIds } })
+      .toArray();
+    const carIds = soldVehicles.map((vehicle) => vehicle.car_id);
+
+    // Check if the requested car ID is owned by the user
+    if (!carIds.includes(car_id)) {
       return res.status(404).json({ error: "Car not found for the user" });
     }
 
-    // Fetch the car by ID
+    // Fetch the details of the car
     const car = await carsCollection.findOne({ car_id });
 
     // Return the car owned by the user
@@ -216,8 +235,9 @@ export const getMyCarDetails = async (req, res) => {
 // add sold vehicles
 export const addSoldVehicles = async (req, res) => {
   try {
-    // Extract data from the request body
-    const { user_id, car_id, dealership_id } = req.body;
+    const user_id = req.headers.user_id;
+    const car_id = req.headers.car_id;
+    const dealership_id = req.headers.dealership_id;
 
     // Connect to the database
     await client.connect();

@@ -50,8 +50,8 @@ userRoutes.post("/login", userLogin); // user login
 userRoutes.post("/register", userRegister); // user register
 userRoutes.post("/validate-token",validateUser); // validate user token
 userRoutes.post("/buy-car", addSoldVehicles); // add in owned vehicles
-userRoutes.get("/my-vehicles/:user_id", getMyCarsDetails); // all owned vehicles with dealer info
-userRoutes.get("/my-vehicle/:user_id/:car_id", getMyCarDetails); // every owned vehicle with info
+userRoutes.get("/my-vehicles", getMyCarsDetails); // all owned vehicles with dealer info
+userRoutes.get("/my-vehicle/:car_id", getMyCarDetails); // every owned vehicle with info
 
 // dealership routes ("http://localhost:5001/api/dealership")
 dealershipRoutes.post("/login", dealershipLogin); // dealership login
