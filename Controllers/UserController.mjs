@@ -300,7 +300,11 @@ export const addSoldVehicles = async (req, res) => {
     // Fetch user and dealership details
     const user = await usersCollection.findOne({ user_id });
     const dealership = await dealershipsCollection.findOne({ dealership_id });
-
+    
+    // Check if the car is available in the seller's dealership
+    if (!dealership || !dealership.cars.includes(car_id)) {
+      return res.status(404).json({ error: "Car not found in dealership" });
+    }
     // Generate a new ID for the sold vehicle
     const vehicle_id = `${car_id}-${uuidv4()}`;
 
