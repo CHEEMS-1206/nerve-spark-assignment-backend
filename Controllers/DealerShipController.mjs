@@ -175,7 +175,7 @@ export const validateDealership = async (req, res) =>{
 // gell all vehicles owned by dealership
 export const allCarsForSaleAtDealership = async (req, res) => {
   try {
-    const { dealership_id } = req.params;
+    const dealership_id = req.headers.dealership_id;
 
     // Connect to MongoDB
     await client.connect();
@@ -207,7 +207,8 @@ export const allCarsForSaleAtDealership = async (req, res) => {
 // get vehicle details owned by me
 export const carForSaleAtDealership = async (req, res) => {
   try {
-    const { dealership_id, car_id } = req.params;
+    const dealership_id = req.headers.dealership_id;
+    const car_id = req.headers.car_id;
 
     // Connect to MongoDB
     await client.connect();
@@ -243,7 +244,7 @@ export const carForSaleAtDealership = async (req, res) => {
 export const postNewDeal = async (req, res) => {
   try {
     const { car_id, deal_info } = req.body;
-    const { dealership_name } = req.params;
+    const dealership_id = req.headers.dealership_id;
 
     // Connect to MongoDB
     await client.connect();
@@ -252,7 +253,7 @@ export const postNewDeal = async (req, res) => {
     const dealershipsCollection = database.collection("dealerships");
 
     // Find the dealership by name
-    const dealership = await dealershipsCollection.findOne({ dealership_name });
+    const dealership = await dealershipsCollection.findOne({ dealership_id });
     if (!dealership) {
       return res.status(404).json({ error: "Dealership not found" });
     }
@@ -261,7 +262,7 @@ export const postNewDeal = async (req, res) => {
     const deal_id = uuidv4();
     // Push deal ID to the dealership's deals array
     await dealershipsCollection.updateOne(
-      { dealership_name },
+      { dealership_id },
       { $push: { deals: deal_id } }
     );
 
@@ -288,6 +289,7 @@ export const postNewDeal = async (req, res) => {
 export const addNewCar = async (req, res) => {
   try {
     const { car_id, type, name, model, car_info } = req.body;
+    const dealership_id = req.headers.dealership_id;
 
     // Convert launch date string to Date object
     const launch_date = new Date(car_info.launch_date);
@@ -296,6 +298,7 @@ export const addNewCar = async (req, res) => {
     await client.connect();
     const database = client.db(process.env.DB_NAME);
     const carsCollection = database.collection("cars");
+    const dealershipCollection = database.collection("dealerships");
 
     // Check if the car ID already exists
     const existingCar = await carsCollection.findOne({ car_id });
@@ -317,6 +320,12 @@ export const addNewCar = async (req, res) => {
 
     // Insert the new car document into the database
     await carsCollection.insertOne(newCar);
+
+    // Update the dealership document to include the new car ID
+    await dealershipCollection.updateOne(
+      { dealership_id },
+      { $addToSet: { cars: car_id } }
+    );
 
     // Return success response
     res.status(201).json({ message: "Car added successfully" });

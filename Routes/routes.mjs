@@ -58,9 +58,9 @@ dealershipRoutes.post("/login", dealershipLogin); // dealership login
 dealershipRoutes.post("/register", dealershipRegister); // dealers register
 dealershipRoutes.post("/validate-token", validateDealership); // validate dealership token
 dealershipRoutes.post("/sell-car", addSoldVehicles); // sold vehicles me add
-dealershipRoutes.get("/vehicles-for-sale/:dealership_id",allCarsForSaleAtDealership); // all sold vehicles with dealer info
-dealershipRoutes.get("/vehicle-for-sale/:dealership_id/:car_id",carForSaleAtDealership); // every sold vehicle with info
-dealershipRoutes.post("/deals/dealership=:dealership_name", postNewDeal); // add new deal
+dealershipRoutes.get("/vehicles-for-sale",allCarsForSaleAtDealership); // all sold vehicles with dealer info
+dealershipRoutes.get("/vehicle-for-sale/:car_id",carForSaleAtDealership); // every sold vehicle with info
+dealershipRoutes.post("/deals", postNewDeal); // add new deal
 dealershipRoutes.post("/add-car", addNewCar); // adding cars by dealership
 
 // general routes
